@@ -21,21 +21,21 @@ export type Input = Record<string, unknown>;
 /** @internal */
 export interface CreateEnvParams<
 	TPrefix extends string,
-	TShared,
-	TClient extends Prefixed<TPrefix, TClient>,
-	TServer extends Unprefixed<TPrefix, TServer>,
+	TSystem,
+	TPublic extends Prefixed<TPrefix, TPublic>,
+	TPrivate extends Unprefixed<TPrefix, TPrivate>,
 > {
 	prefix: TPrefix;
 
-	shared: (input: Input) => TShared;
-	client: (input: Input) => TClient;
-	server: (input: Input) => TServer;
+	system: (input: Input) => TSystem;
+	public: (input: Input) => TPublic;
+	private: (input: Input) => TPrivate;
 
 	isServer?: boolean;
 
-	environment: Record<keyof TClient | keyof TServer | keyof TShared, unknown>;
+	environment: Record<keyof TPrivate | keyof TPublic | keyof TSystem, unknown>;
 
-	skip?: boolean;
+	validation?: "disabled" | "enabled" | "public";
 
 	onError?: (error: Error) => never;
 	onInvalidAccess?: (key: string) => never;
@@ -50,37 +50,47 @@ export function createEnv<
 	params: CreateEnvParams<TPrefix, TShared, TClient, TServer>,
 ): Readonly<TClient & TServer & TShared> {
 	const {
-		client,
+		public: client,
 		environment,
 		isServer = typeof document === "undefined",
 		onError,
 		onInvalidAccess,
 		prefix: _prefix,
-		server,
-		shared,
-		skip,
+		private: server,
+		system: shared,
+		validation,
 	} = params;
 
 	for (const [key, value] of Object.entries(environment)) {
 		if (value === "") delete environment[key as keyof typeof environment];
 	}
 
-	if (skip === true) return environment as any;
+	if (validation === "disabled") return Object.freeze(environment) as any;
 
 	try {
 		if (isServer) {
+			if (validation === "public") {
+				const env = Object.freeze({
+					...environment,
+					...client(environment),
+					...shared(environment),
+				});
+
+				return env as any;
+			}
+
 			const env = Object.freeze({
-				...shared(environment),
-				...client(environment),
 				...server(environment),
+				...client(environment),
+				...shared(environment),
 			});
 
 			return env;
 		}
 
 		const env = Object.freeze({
-			...shared(environment),
 			...client(environment),
+			...shared(environment),
 		});
 
 		const proxy = new Proxy(env, {

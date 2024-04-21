@@ -15,20 +15,20 @@ test("should validate environment variables", () => {
 			NODE_ENV: "production",
 		},
 		prefix: "NEXT_PUBLIC_",
-		shared(input) {
+		system(input) {
 			const Schema = v.object({
 				NODE_ENV: v.optional(v.picklist(["development", "production"]), "development"),
 			});
 			return v.parse(Schema, input);
 		},
-		client(input) {
+		public(input) {
 			const Schema = v.object({
 				NEXT_PUBLIC_APP_BASE_URL: v.string([v.url()]),
 				NEXT_PUBLIC_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 			});
 			return v.parse(Schema, input);
 		},
-		server(input) {
+		private(input) {
 			const Schema = v.object({
 				AUTH_URL: v.string([v.url()]),
 			});
@@ -38,6 +38,45 @@ test("should validate environment variables", () => {
 
 	assert.equal(env, {
 		AUTH_URL: "http://localhost:3000/api/auth",
+		NEXT_PUBLIC_APP_BASE_URL: "http://localhost:3000",
+		NEXT_PUBLIC_BOTS: "disabled",
+		NODE_ENV: "production",
+	});
+});
+
+test('should only validate public environment variables with `validation="public"`', () => {
+	const env = createEnv({
+		environment: {
+			AUTH_URL: undefined,
+			NEXT_PUBLIC_APP_BASE_URL: "http://localhost:3000",
+			NEXT_PUBLIC_BOTS: undefined,
+			NODE_ENV: "production",
+		},
+		prefix: "NEXT_PUBLIC_",
+		validation: "public",
+		system(input) {
+			const Schema = v.object({
+				NODE_ENV: v.optional(v.picklist(["development", "production"]), "development"),
+			});
+			return v.parse(Schema, input);
+		},
+		public(input) {
+			const Schema = v.object({
+				NEXT_PUBLIC_APP_BASE_URL: v.string([v.url()]),
+				NEXT_PUBLIC_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
+			});
+			return v.parse(Schema, input);
+		},
+		private(input) {
+			const Schema = v.object({
+				AUTH_URL: v.string([v.url()]),
+			});
+			return v.parse(Schema, input);
+		},
+	});
+
+	assert.equal(env, {
+		AUTH_URL: undefined,
 		NEXT_PUBLIC_APP_BASE_URL: "http://localhost:3000",
 		NEXT_PUBLIC_BOTS: "disabled",
 		NODE_ENV: "production",
@@ -54,20 +93,20 @@ test("should display type error when environment is missing variables", () => {
 				NODE_ENV: "production",
 			},
 			prefix: "NEXT_PUBLIC_",
-			shared(input) {
+			system(input) {
 				const Schema = v.object({
 					NODE_ENV: v.optional(v.picklist(["development", "production"]), "development"),
 				});
 				return v.parse(Schema, input);
 			},
-			client(input) {
+			public(input) {
 				const Schema = v.object({
 					NEXT_PUBLIC_APP_BASE_URL: v.string([v.url()]),
 					NEXT_PUBLIC_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 				});
 				return v.parse(Schema, input);
 			},
-			server(input) {
+			private(input) {
 				const Schema = v.object({
 					AUTH_URL: v.string([v.url()]),
 				});
@@ -89,20 +128,20 @@ test("should display type error when environment has excess variables", () => {
 				NODE_ENV: "production",
 			},
 			prefix: "NEXT_PUBLIC_",
-			shared(input) {
+			system(input) {
 				const Schema = v.object({
 					NODE_ENV: v.optional(v.picklist(["development", "production"]), "development"),
 				});
 				return v.parse(Schema, input);
 			},
-			client(input) {
+			public(input) {
 				const Schema = v.object({
 					NEXT_PUBLIC_APP_BASE_URL: v.string([v.url()]),
 					NEXT_PUBLIC_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 				});
 				return v.parse(Schema, input);
 			},
-			server(input) {
+			private(input) {
 				const Schema = v.object({
 					AUTH_URL: v.string([v.url()]),
 				});
@@ -123,14 +162,14 @@ test("should display type errors when providing prefixed server-side variables o
 				NODE_ENV: "production",
 			},
 			prefix: "NEXT_PUBLIC_",
-			shared(input) {
+			system(input) {
 				const Schema = v.object({
 					NODE_ENV: v.optional(v.picklist(["development", "production"]), "development"),
 				});
 				return v.parse(Schema, input);
 			},
 			// @ts-expect-error Client-side environment variables must be prefixed.
-			client(input) {
+			public(input) {
 				const Schema = v.object({
 					AUTH_URL: v.string([v.url()]),
 					NEXT_PUBLIC_APP_BASE_URL: v.string([v.url()]),
@@ -138,7 +177,7 @@ test("should display type errors when providing prefixed server-side variables o
 				return v.parse(Schema, input);
 			},
 			// @ts-expect-error Server-side environment variables must not be prefixed.
-			server(input) {
+			private(input) {
 				const Schema = v.object({
 					NEXT_PUBLIC_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 				});
@@ -160,20 +199,20 @@ test("should display default validation error", () => {
 				NODE_ENV: "production",
 			},
 			prefix: "NEXT_PUBLIC_",
-			shared(input) {
+			system(input) {
 				const Schema = v.object({
 					NODE_ENV: v.optional(v.picklist(["development", "production"]), "development"),
 				});
 				return v.parse(Schema, input);
 			},
-			client(input) {
+			public(input) {
 				const Schema = v.object({
 					NEXT_PUBLIC_APP_BASE_URL: v.string([v.url()]),
 					NEXT_PUBLIC_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 				});
 				return v.parse(Schema, input);
 			},
-			server(input) {
+			private(input) {
 				const Schema = v.object({
 					AUTH_URL: v.string([v.url()]),
 				});
@@ -194,20 +233,20 @@ test("should display custom validation error", () => {
 				NODE_ENV: "production",
 			},
 			prefix: "NEXT_PUBLIC_",
-			shared(input) {
+			system(input) {
 				const Schema = v.object({
 					NODE_ENV: v.optional(v.picklist(["development", "production"]), "development"),
 				});
 				return v.parse(Schema, input);
 			},
-			client(input) {
+			public(input) {
 				const Schema = v.object({
 					NEXT_PUBLIC_APP_BASE_URL: v.string([v.url()]),
 					NEXT_PUBLIC_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 				});
 				return v.parse(Schema, input);
 			},
-			server(input) {
+			private(input) {
 				const Schema = v.object({
 					AUTH_URL: v.string([v.url()]),
 				});
@@ -240,20 +279,20 @@ test("should display error when server-only variables are accessed on client", (
 			NODE_ENV: "production",
 		},
 		prefix: "NEXT_PUBLIC_",
-		shared(input) {
+		system(input) {
 			const Schema = v.object({
 				NODE_ENV: v.optional(v.picklist(["development", "production"]), "development"),
 			});
 			return v.parse(Schema, input);
 		},
-		client(input) {
+		public(input) {
 			const Schema = v.object({
 				NEXT_PUBLIC_APP_BASE_URL: v.string([v.url()]),
 				NEXT_PUBLIC_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 			});
 			return v.parse(Schema, input);
 		},
-		server(input) {
+		private(input) {
 			const Schema = v.object({
 				AUTH_URL: v.string([v.url()]),
 			});
