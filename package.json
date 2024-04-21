@@ -17,7 +17,7 @@
 		"node": ">=20",
 		"pnpm": ">=8"
 	},
-	"packageManager": "pnpm@8.15.6",
+	"packageManager": "pnpm@8.15.7",
 	"scripts": {
 		"build": "tsup",
 		"changeset:add": "changeset add",
@@ -50,9 +50,20 @@
 		"simple-git-hooks": "^2.11.1",
 		"tsm": "^2.3.0",
 		"tsup": "^8.0.2",
-		"typescript": "^5.4.4",
+		"typescript": "^5.4.5",
 		"uvu": "^0.5.6",
 		"valibot": "^0.30.0"
+	},
+	"pnpm": {
+		"overrides": {
+			"@commitlint/config-conventional": "$@commitlint/cli"
+		},
+		"updateConfig": {
+			"ignoreDependencies": [
+				"@commitlint/cli",
+				"eslint"
+			]
+		}
 	},
 	"commitlint": {
 		"extends": "@acdh-oeaw/commitlint-config"
