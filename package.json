@@ -15,9 +15,9 @@
 	"sideEffects": false,
 	"engines": {
 		"node": ">=20",
-		"pnpm": ">=8"
+		"pnpm": ">=9"
 	},
-	"packageManager": "pnpm@8.15.7",
+	"packageManager": "pnpm@9.0.5",
 	"scripts": {
 		"build": "tsup",
 		"changeset:add": "changeset add",

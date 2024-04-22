@@ -2,7 +2,9 @@ import { suite } from "uvu";
 import * as assert from "uvu/assert";
 import * as v from "valibot";
 
+import { createEnv as createAstroEnv } from "./astro.js";
 import { createEnv } from "./index.js";
+import { createEnv as createNextEnv } from "./next.js";
 
 const test = suite("createEnv");
 
@@ -310,6 +312,80 @@ test("should display error when server-only variables are accessed on client", (
 		() => env.AUTH_URL,
 		/Attempted to access a server-side environment variable on the client/,
 	);
+});
+
+test("should use PUBLIC_ prefix when using astro entrypoint", () => {
+	const env = createAstroEnv({
+		environment: {
+			AUTH_URL: "http://localhost:3000/api/auth",
+			NODE_ENV: "production",
+			PUBLIC_APP_BASE_URL: "http://localhost:3000",
+			PUBLIC_BOTS: undefined,
+		},
+		system(input) {
+			const Schema = v.object({
+				NODE_ENV: v.optional(v.picklist(["development", "production"]), "development"),
+			});
+			return v.parse(Schema, input);
+		},
+		public(input) {
+			const Schema = v.object({
+				PUBLIC_APP_BASE_URL: v.string([v.url()]),
+				PUBLIC_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
+			});
+			return v.parse(Schema, input);
+		},
+		private(input) {
+			const Schema = v.object({
+				AUTH_URL: v.string([v.url()]),
+			});
+			return v.parse(Schema, input);
+		},
+	});
+
+	assert.equal(env, {
+		AUTH_URL: "http://localhost:3000/api/auth",
+		NODE_ENV: "production",
+		PUBLIC_APP_BASE_URL: "http://localhost:3000",
+		PUBLIC_BOTS: "disabled",
+	});
+});
+
+test("should use NEXT_PUBLIC_ prefix when using next.js entrypoint", () => {
+	const env = createNextEnv({
+		environment: {
+			AUTH_URL: "http://localhost:3000/api/auth",
+			NEXT_PUBLIC_APP_BASE_URL: "http://localhost:3000",
+			NEXT_PUBLIC_BOTS: undefined,
+			NODE_ENV: "production",
+		},
+		system(input) {
+			const Schema = v.object({
+				NODE_ENV: v.optional(v.picklist(["development", "production"]), "development"),
+			});
+			return v.parse(Schema, input);
+		},
+		public(input) {
+			const Schema = v.object({
+				NEXT_PUBLIC_APP_BASE_URL: v.string([v.url()]),
+				NEXT_PUBLIC_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
+			});
+			return v.parse(Schema, input);
+		},
+		private(input) {
+			const Schema = v.object({
+				AUTH_URL: v.string([v.url()]),
+			});
+			return v.parse(Schema, input);
+		},
+	});
+
+	assert.equal(env, {
+		AUTH_URL: "http://localhost:3000/api/auth",
+		NEXT_PUBLIC_APP_BASE_URL: "http://localhost:3000",
+		NEXT_PUBLIC_BOTS: "disabled",
+		NODE_ENV: "production",
+	});
 });
 
 test.run();
