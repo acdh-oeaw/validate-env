@@ -62,10 +62,15 @@ export function createEnv<
 	} = params;
 
 	for (const [key, value] of Object.entries(environment)) {
-		if (value === "") delete environment[key as keyof typeof environment];
+		if (value === "") {
+			// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+			delete environment[key as keyof typeof environment];
+		}
 	}
 
-	if (validation === "disabled") return Object.freeze(environment) as any;
+	if (validation === "disabled") {
+		return Object.freeze(environment) as any;
+	}
 
 	try {
 		if (isServer) {
@@ -95,7 +100,9 @@ export function createEnv<
 
 		const proxy = new Proxy(env, {
 			get(target, key) {
-				if (key in target) return Reflect.get(target, key);
+				if (key in target) {
+					return Reflect.get(target, key);
+				}
 
 				if (onInvalidAccess != null) {
 					onInvalidAccess(String(key));
