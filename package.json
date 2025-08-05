@@ -14,10 +14,16 @@
 	],
 	"sideEffects": false,
 	"engines": {
-		"node": ">=20",
-		"pnpm": ">=9"
+		"node": "^22 || ^24"
 	},
-	"packageManager": "pnpm@9.0.5",
+	"devEngines": {
+		"runtime": {
+			"name": "node",
+			"version": "^22",
+			"onFail": "download"
+		}
+	},
+	"packageManager": "pnpm@10.14.0",
 	"scripts": {
 		"build": "tsdown",
 		"changeset:add": "changeset add",
@@ -53,17 +59,6 @@
 		"typescript": "^5.4.5",
 		"uvu": "^0.5.6",
 		"valibot": "^0.30.0"
-	},
-	"pnpm": {
-		"overrides": {
-			"@commitlint/config-conventional": "$@commitlint/cli"
-		},
-		"updateConfig": {
-			"ignoreDependencies": [
-				"@commitlint/cli",
-				"eslint"
-			]
-		}
 	},
 	"commitlint": {
 		"extends": "@acdh-oeaw/commitlint-config"
