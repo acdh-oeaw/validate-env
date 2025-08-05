@@ -25,14 +25,14 @@ test("should validate environment variables", () => {
 		},
 		public(input) {
 			const Schema = v.object({
-				NEXT_PUBLIC_APP_BASE_URL: v.string([v.url()]),
+				NEXT_PUBLIC_APP_BASE_URL: v.pipe(v.string(), v.url()),
 				NEXT_PUBLIC_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 			});
 			return v.parse(Schema, input);
 		},
 		private(input) {
 			const Schema = v.object({
-				AUTH_URL: v.string([v.url()]),
+				AUTH_URL: v.pipe(v.string(), v.url()),
 			});
 			return v.parse(Schema, input);
 		},
@@ -64,14 +64,14 @@ test('should only validate public environment variables with `validation="public
 		},
 		public(input) {
 			const Schema = v.object({
-				NEXT_PUBLIC_APP_BASE_URL: v.string([v.url()]),
+				NEXT_PUBLIC_APP_BASE_URL: v.pipe(v.string(), v.url()),
 				NEXT_PUBLIC_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 			});
 			return v.parse(Schema, input);
 		},
 		private(input) {
 			const Schema = v.object({
-				AUTH_URL: v.string([v.url()]),
+				AUTH_URL: v.pipe(v.string(), v.url()),
 			});
 			return v.parse(Schema, input);
 		},
@@ -103,14 +103,14 @@ test("should display type error when environment is missing variables", () => {
 			},
 			public(input) {
 				const Schema = v.object({
-					NEXT_PUBLIC_APP_BASE_URL: v.string([v.url()]),
+					NEXT_PUBLIC_APP_BASE_URL: v.pipe(v.string(), v.url()),
 					NEXT_PUBLIC_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 				});
 				return v.parse(Schema, input);
 			},
 			private(input) {
 				const Schema = v.object({
-					AUTH_URL: v.string([v.url()]),
+					AUTH_URL: v.pipe(v.string(), v.url()),
 				});
 				return v.parse(Schema, input);
 			},
@@ -138,14 +138,14 @@ test("should display type error when environment has excess variables", () => {
 			},
 			public(input) {
 				const Schema = v.object({
-					NEXT_PUBLIC_APP_BASE_URL: v.string([v.url()]),
+					NEXT_PUBLIC_APP_BASE_URL: v.pipe(v.string(), v.url()),
 					NEXT_PUBLIC_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 				});
 				return v.parse(Schema, input);
 			},
 			private(input) {
 				const Schema = v.object({
-					AUTH_URL: v.string([v.url()]),
+					AUTH_URL: v.pipe(v.string(), v.url()),
 				});
 				return v.parse(Schema, input);
 			},
@@ -173,8 +173,8 @@ test("should display type errors when providing prefixed server-side variables o
 			// @ts-expect-error Client-side environment variables must be prefixed.
 			public(input) {
 				const Schema = v.object({
-					AUTH_URL: v.string([v.url()]),
-					NEXT_PUBLIC_APP_BASE_URL: v.string([v.url()]),
+					AUTH_URL: v.pipe(v.string(), v.url()),
+					NEXT_PUBLIC_APP_BASE_URL: v.pipe(v.string(), v.url()),
 				});
 				return v.parse(Schema, input);
 			},
@@ -209,20 +209,20 @@ test("should display default validation error", () => {
 			},
 			public(input) {
 				const Schema = v.object({
-					NEXT_PUBLIC_APP_BASE_URL: v.string([v.url()]),
+					NEXT_PUBLIC_APP_BASE_URL: v.pipe(v.string(), v.url()),
 					NEXT_PUBLIC_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 				});
 				return v.parse(Schema, input);
 			},
 			private(input) {
 				const Schema = v.object({
-					AUTH_URL: v.string([v.url()]),
+					AUTH_URL: v.pipe(v.string(), v.url()),
 				});
 				return v.parse(Schema, input);
 			},
 		});
 
-	assert.throws(env, /Invalid type: Expected "disabled" \| "enabled" but received "yes"/);
+	assert.throws(env, /Invalid type: Expected \("disabled" | "enabled"\) but received "yes"/);
 });
 
 test("should display custom validation error", () => {
@@ -243,22 +243,20 @@ test("should display custom validation error", () => {
 			},
 			public(input) {
 				const Schema = v.object({
-					NEXT_PUBLIC_APP_BASE_URL: v.string([v.url()]),
+					NEXT_PUBLIC_APP_BASE_URL: v.pipe(v.string(), v.url()),
 					NEXT_PUBLIC_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 				});
 				return v.parse(Schema, input);
 			},
 			private(input) {
 				const Schema = v.object({
-					AUTH_URL: v.string([v.url()]),
+					AUTH_URL: v.pipe(v.string(), v.url()),
 				});
 				return v.parse(Schema, input);
 			},
 			onError(error) {
-				if (error instanceof v.ValiError) {
-					throw new Error(
-						`❌ Invalid environment variables:\n${JSON.stringify(v.flatten(error).nested)}`,
-					);
+				if (v.isValiError(error)) {
+					throw new Error(`❌ Invalid environment variables:\n${v.summarize(error.issues)}`);
 				}
 
 				throw error;
@@ -267,7 +265,7 @@ test("should display custom validation error", () => {
 
 	assert.throws(
 		env,
-		/Invalid environment variables:\n{"NEXT_PUBLIC_BOTS":\["Invalid type: Expected \\"disabled\\" \| \\"enabled\\" but received \\"yes\\""]}/,
+		/Invalid environment variables:\n× Invalid type: Expected \("disabled" \| "enabled"\) but received "yes"\n {2}→ at NEXT_PUBLIC_BOTS/,
 	);
 });
 
@@ -289,14 +287,14 @@ test("should display error when server-only variables are accessed on client", (
 		},
 		public(input) {
 			const Schema = v.object({
-				NEXT_PUBLIC_APP_BASE_URL: v.string([v.url()]),
+				NEXT_PUBLIC_APP_BASE_URL: v.pipe(v.string(), v.url()),
 				NEXT_PUBLIC_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 			});
 			return v.parse(Schema, input);
 		},
 		private(input) {
 			const Schema = v.object({
-				AUTH_URL: v.string([v.url()]),
+				AUTH_URL: v.pipe(v.string(), v.url()),
 			});
 			return v.parse(Schema, input);
 		},
@@ -330,14 +328,14 @@ test("should use PUBLIC_ prefix when using astro entrypoint", () => {
 		},
 		public(input) {
 			const Schema = v.object({
-				PUBLIC_APP_BASE_URL: v.string([v.url()]),
+				PUBLIC_APP_BASE_URL: v.pipe(v.string(), v.url()),
 				PUBLIC_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 			});
 			return v.parse(Schema, input);
 		},
 		private(input) {
 			const Schema = v.object({
-				AUTH_URL: v.string([v.url()]),
+				AUTH_URL: v.pipe(v.string(), v.url()),
 			});
 			return v.parse(Schema, input);
 		},
@@ -367,14 +365,14 @@ test("should use NEXT_PUBLIC_ prefix when using next.js entrypoint", () => {
 		},
 		public(input) {
 			const Schema = v.object({
-				NEXT_PUBLIC_APP_BASE_URL: v.string([v.url()]),
+				NEXT_PUBLIC_APP_BASE_URL: v.pipe(v.string(), v.url()),
 				NEXT_PUBLIC_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 			});
 			return v.parse(Schema, input);
 		},
 		private(input) {
 			const Schema = v.object({
-				AUTH_URL: v.string([v.url()]),
+				AUTH_URL: v.pipe(v.string(), v.url()),
 			});
 			return v.parse(Schema, input);
 		},

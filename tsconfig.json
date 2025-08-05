@@ -2,8 +2,7 @@
 	"$schema": "https://json.schemastore.org/tsconfig",
 	"extends": "@acdh-oeaw/tsconfig-lib",
 	"compilerOptions": {
-		/** @see https://github.com/egoist/tsup/issues/615 */
-		"incremental": false
+		"declaration": false
 	},
 	"exclude": ["dist", "node_modules"]
 }
