@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@acdh-oeaw/lib':
+        specifier: ^0.3.3
+        version: 0.3.3
     devDependencies:
       '@acdh-oeaw/commitlint-config':
         specifier: ^2.0.0
@@ -86,6 +90,10 @@ packages:
       eslint: 9.x
       globals: 16.x
       typescript: 5.x
+
+  '@acdh-oeaw/lib@0.3.3':
+    resolution: {integrity: sha512-IAc+XmA9mAppz+32L5M1h6rHHN7jPjmv40EE1dSrW9sqSyIUx8c+EABzK21orpcLFaAZ+30vVSH0AgOIwFqAgg==}
+    engines: {node: '>=22', pnpm: 10.x}
 
   '@acdh-oeaw/prettier-config@2.0.1':
     resolution: {integrity: sha512-0M77qAD8Uhks+S6lPaKzq6ylwQJzjS33jE6uWKNM9dt7iJ1KHgsuZ3xVhWNmw5h/cUGYJvBi0V/ZSy65ow+9Ag==}
@@ -1645,8 +1653,7 @@ packages:
           targets:
             - cpu: x86
               os: win32
-    version: 22.18.0
-    hasBin: true
+    version: 0.0.0
 
   npm-normalize-package-bin@4.0.0:
     resolution: {integrity: sha512-TZKxPvItzai9kN9H/TkmCtx/ZN/hvr3vUycjlfmH0ootY9yFBzNOpiXAdIn1Iteqsvk4lQn6B5PTrt+n6h8k/w==}
@@ -2145,6 +2152,8 @@ snapshots:
       - eslint-import-resolver-node
       - eslint-plugin-import
       - supports-color
+
+  '@acdh-oeaw/lib@0.3.3': {}
 
   '@acdh-oeaw/prettier-config@2.0.1(prettier@3.6.2)':
     dependencies:

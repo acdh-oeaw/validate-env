@@ -1,66 +1,43 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 
-/** @internal */
-export type Prefixed<TPrefix extends string, TInput> = {
-	[K in keyof TInput]: K extends `${TPrefix}${string}`
-		? unknown
-		: `${K & string} must be prefixed with ${TPrefix}`;
+import { err, ok, type Result } from "@acdh-oeaw/lib";
+import * as v from "valibot";
+
+type Prefixed<T extends v.ObjectEntries> = {
+	[K in keyof T]: K extends `NEXT_PUBLIC_${string}` ? T[K] : never;
 };
 
-/** @internal */
-export type Unprefixed<TPrefix extends string, TInput> = {
-	[K in keyof TInput]: K extends `${TPrefix}${string}`
-		? `${K & string} must be prefixed with ${TPrefix}`
-		: unknown;
+type Unprefixed<T extends v.ObjectEntries> = {
+	[K in keyof T]: K extends `NEXT_PUBLIC_${string}` ? never : T[K];
 };
 
-/** @internal */
-export type Input = Record<string, unknown>;
-
-/** @internal */
-export interface CreateEnvParams<
-	TPrefix extends string,
-	TSystem,
-	TPublic extends Prefixed<TPrefix, TPublic>,
-	TPrivate extends Unprefixed<TPrefix, TPrivate>,
-> {
-	prefix: TPrefix;
-
-	system: (input: Input) => TSystem;
-	public: (input: Input) => TPublic;
-	private: (input: Input) => TPrivate;
-
-	isServer?: boolean;
-
-	environment: Record<keyof TPrivate | keyof TPublic | keyof TSystem, unknown>;
-
+export function validate<
+	TSystem extends Unprefixed<TSystem>,
+	TPrivate extends Unprefixed<TPrivate>,
+	TPublic extends Prefixed<TPublic>,
+>({
+	schemas,
+	environment,
+	validation = "enabled",
+}: {
+	schemas: {
+		system?: v.ObjectSchema<TSystem, any>;
+		private?: v.ObjectSchema<TPrivate, any>;
+		public?: v.ObjectSchema<TPublic, any>;
+	};
+	environment: Record<
+		keyof NoInfer<TSystem> | keyof NoInfer<TPrivate> | keyof NoInfer<TPublic>,
+		unknown
+	>;
 	validation?: "disabled" | "enabled" | "public";
-
-	onError?: (error: Error) => never;
-	onInvalidAccess?: (key: string) => never;
-}
-
-export function createEnv<
-	TPrefix extends string,
-	TShared,
-	TClient extends Prefixed<TPrefix, TClient>,
-	TServer extends Unprefixed<TPrefix, TServer>,
->(
-	params: CreateEnvParams<TPrefix, TShared, TClient, TServer>,
-): Readonly<TClient & TServer & TShared> {
-	const {
-		public: client,
-		environment,
-		isServer = typeof document === "undefined",
-		onError,
-		onInvalidAccess,
-		prefix: _prefix,
-		private: server,
-		system: shared,
-		validation,
-	} = params;
-
+}): Result<
+	v.InferOutput<
+		v.ObjectSchema<NoInfer<TSystem>, any> &
+			v.ObjectSchema<NoInfer<TPrivate>, any> &
+			v.ObjectSchema<NoInfer<TPublic>, any>
+	>,
+	EnvValidationError
+> {
 	for (const [key, value] of Object.entries(environment)) {
 		if (value === "") {
 			// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
@@ -69,55 +46,77 @@ export function createEnv<
 	}
 
 	if (validation === "disabled") {
-		return Object.freeze(environment) as any;
+		return ok(Object.freeze(environment as any));
 	}
 
-	try {
-		if (isServer) {
-			if (validation === "public") {
-				const env = Object.freeze({
-					...environment,
-					...client(environment),
-					...shared(environment),
-				});
+	const isClient = typeof document !== "undefined";
 
-				return env as any;
-			}
+	if (isClient) {
+		const schema = v.object({
+			...schemas.system?.entries,
+			...schemas.public?.entries,
+		});
 
-			const env = Object.freeze({
-				...server(environment),
-				...client(environment),
-				...shared(environment),
+		const result = v.safeParse(schema, environment);
+
+		if (result.success) {
+			const proxy = new Proxy(Object.freeze(result.output), {
+				get(target, prop) {
+					if (prop in target) {
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-return
+						return Reflect.get(target, prop);
+					}
+
+					throw new Error(`Invalid property access: ${String(prop)}.`);
+				},
 			});
 
-			return env;
+			return ok(proxy as any);
 		}
+	}
 
-		const env = Object.freeze({
-			...client(environment),
-			...shared(environment),
+	if (validation === "public") {
+		const schema = v.object({
+			...schemas.system?.entries,
+			...schemas.public?.entries,
 		});
 
-		const proxy = new Proxy(env, {
-			get(target, key) {
-				if (key in target) {
-					return Reflect.get(target, key);
-				}
+		const result = v.safeParse(schema, environment);
 
-				if (onInvalidAccess != null) {
-					onInvalidAccess(String(key));
-				}
+		if (result.success) {
+			return ok(Object.freeze({ ...environment, ...result.output } as any));
+		}
+	}
 
-				throw new Error(`Invalid property access: ${String(key)}.`);
-			},
-		});
+	const schema = v.object({
+		...schemas.system?.entries,
+		...schemas.private?.entries,
+		...schemas.public?.entries,
+	});
 
-		return proxy as any;
-	} catch (error) {
-		if (error instanceof Error && onError != null) {
-			onError(error);
+	const result = v.safeParse(schema, environment);
+
+	if (result.success) {
+		return ok(Object.freeze(result.output as any));
+	}
+
+	return err(new EnvValidationError(v.summarize(result.issues)));
+}
+
+export class EnvValidationError extends Error {
+	private static readonly type = "EnvValidationError";
+
+	static is(error: unknown): error is EnvValidationError {
+		if (error instanceof EnvValidationError) {
+			return true;
 		}
 
-		throw error;
+		return error instanceof Error && error.name === EnvValidationError.type;
+	}
+
+	constructor(message?: string) {
+		super(message);
+
+		this.name = EnvValidationError.type;
 	}
 }
