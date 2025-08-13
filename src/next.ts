@@ -3,16 +3,19 @@ import {
 	type CreateEnvParams,
 	type Prefixed,
 	type Unprefixed,
+	ValidationError,
 } from "./index.js";
 
 export function createEnv<
 	TPrefix extends "NEXT_PUBLIC_",
-	TShared,
-	TClient extends Prefixed<TPrefix, TClient>,
-	TServer extends Unprefixed<TPrefix, TServer>,
->(params: Omit<CreateEnvParams<TPrefix, TShared, TClient, TServer>, "prefix">) {
+	TPrivate extends Unprefixed<TPrefix, TPrivate>,
+	TPublic extends Prefixed<TPrefix, TPublic>,
+	TSystem extends Unprefixed<TPrefix, TSystem>,
+>(params: Omit<CreateEnvParams<TPrefix, TPrivate, TPublic, TSystem>, "prefix">) {
 	return _createEnv({
 		...params,
 		prefix: "NEXT_PUBLIC_",
-	} as CreateEnvParams<TPrefix, TShared, TClient, TServer>);
+	} as CreateEnvParams<TPrefix, TPrivate, TPublic, TSystem>);
 }
+
+export { ValidationError };

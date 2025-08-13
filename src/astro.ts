@@ -4,20 +4,23 @@ import {
 	type Input,
 	type Prefixed,
 	type Unprefixed,
+	ValidationError,
 } from "./index.js";
 
 export function createEnv<
 	TPrefix extends "PUBLIC_",
-	TShared,
-	TClient extends Prefixed<TPrefix, TClient>,
-	TServer extends Unprefixed<TPrefix, TServer>,
+	TPrivate extends Unprefixed<TPrefix, TPrivate>,
+	TPublic extends Prefixed<TPrefix, TPublic>,
+	TSystem extends Unprefixed<TPrefix, TSystem>,
 >(
-	params: Omit<CreateEnvParams<TPrefix, TShared, TClient, TServer>, "environment" | "prefix"> & {
+	params: Omit<CreateEnvParams<TPrefix, TPrivate, TPublic, TSystem>, "environment" | "prefix"> & {
 		environment: Input;
 	},
 ) {
 	return _createEnv({
 		...params,
 		prefix: "PUBLIC_",
-	} as CreateEnvParams<TPrefix, TShared, TClient, TServer>);
+	} as CreateEnvParams<TPrefix, TPrivate, TPublic, TSystem>);
 }
+
+export { ValidationError };
