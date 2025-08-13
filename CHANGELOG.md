@@ -1,5 +1,14 @@
 # @acdh-oeaw/validate-env
 
+## 0.1.0
+
+### Minor Changes
+
+- [#8](https://github.com/acdh-oeaw/validate-env/pull/8)
+  [`e570f0b`](https://github.com/acdh-oeaw/validate-env/commit/e570f0b07767a145dab886caa367410ba2771897)
+  Thanks [@stefanprobst](https://github.com/stefanprobst)! - return validation errors instead of
+  throwing
+
 ## 0.0.3
 
 ### Patch Changes
