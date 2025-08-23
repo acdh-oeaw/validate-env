@@ -92,8 +92,7 @@ export function createEnv<
 > {
 	for (const [key, value] of Object.entries(environment)) {
 		if (value === "") {
-			// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-			delete environment[key as keyof typeof environment];
+			environment[key as keyof typeof environment] = undefined;
 		}
 	}
 
