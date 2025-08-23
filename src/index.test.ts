@@ -311,6 +311,7 @@ test("should display error when server-only variables are accessed on client", (
 			AUTH_URL: "http://localhost:3000/api/auth",
 			NEXT_PUBLIC_APP_BASE_URL: "http://localhost:3000",
 			NEXT_PUBLIC_BOTS: undefined,
+			NEXT_PUBLIC_SEARCH_API_KEY: "",
 			NODE_ENV: "production",
 		},
 		prefix: "NEXT_PUBLIC_",
@@ -332,6 +333,7 @@ test("should display error when server-only variables are accessed on client", (
 				const Schema = v.object({
 					NEXT_PUBLIC_APP_BASE_URL: v.pipe(v.string(), v.url()),
 					NEXT_PUBLIC_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
+					NEXT_PUBLIC_SEARCH_API_KEY: v.optional(v.pipe(v.string(), v.nonEmpty())),
 				});
 
 				const result = v.safeParse(Schema, environment);
@@ -360,6 +362,8 @@ test("should display error when server-only variables are accessed on client", (
 
 	assert.is(env.error, null);
 	assert.not.throws(() => env.value!.NEXT_PUBLIC_APP_BASE_URL);
+	assert.not.throws(() => env.value!.NEXT_PUBLIC_BOTS);
+	assert.not.throws(() => env.value!.NEXT_PUBLIC_SEARCH_API_KEY);
 	assert.throws(() => env.value!.AUTH_URL, /Invalid property access: AUTH_URL./);
 });
 
