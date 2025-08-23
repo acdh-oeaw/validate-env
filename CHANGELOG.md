@@ -1,5 +1,14 @@
 # @acdh-oeaw/validate-env
 
+## 0.1.1
+
+### Patch Changes
+
+- [#10](https://github.com/acdh-oeaw/validate-env/pull/10)
+  [`315850d`](https://github.com/acdh-oeaw/validate-env/commit/315850df1483248b5800c7e22ff3ed47afbce9ec)
+  Thanks [@stefanprobst](https://github.com/stefanprobst)! - don't throw client access error for env
+  vars with empty string value
+
 ## 0.1.0
 
 ### Minor Changes
