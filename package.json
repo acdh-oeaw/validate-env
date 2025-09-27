@@ -2,6 +2,9 @@
 	"name": "@acdh-oeaw/validate-env",
 	"version": "0.1.1",
 	"license": "MIT",
+	"repository": {
+		"url": "https://github.com/acdh-oeaw/validate-env"
+	},
 	"type": "module",
 	"main": "./dist/index.js",
 	"exports": {
