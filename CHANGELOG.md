@@ -1,5 +1,13 @@
 # @acdh-oeaw/validate-env
 
+## 0.2.1
+
+### Patch Changes
+
+- [#17](https://github.com/acdh-oeaw/validate-env/pull/17)
+  [`d6a8d6a`](https://github.com/acdh-oeaw/validate-env/commit/d6a8d6af761f5b5ec26f22ae2da03fdd6526717e)
+  Thanks [@stefanprobst](https://github.com/stefanprobst)! - re-export validation error
+
 ## 0.2.0
 
 ### Minor Changes
