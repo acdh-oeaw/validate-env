@@ -10,7 +10,8 @@
 	"exports": {
 		".": "./dist/index.js",
 		"./astro": "./dist/astro.js",
-		"./next": "./dist/next.js"
+		"./next": "./dist/next.js",
+		"./runtime": "./dist/runtime.js"
 	},
 	"files": [
 		"dist"
