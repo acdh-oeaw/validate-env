@@ -35,3 +35,5 @@ export function createEnv<TPrivate extends Input>({
 
 	return ok(Object.freeze(runtime.value as any));
 }
+
+export { ValidationError };
