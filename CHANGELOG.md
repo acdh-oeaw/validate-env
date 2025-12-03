@@ -1,5 +1,13 @@
 # @acdh-oeaw/validate-env
 
+## 0.2.0
+
+### Minor Changes
+
+- [#15](https://github.com/acdh-oeaw/validate-env/pull/15)
+  [`31db0dc`](https://github.com/acdh-oeaw/validate-env/commit/31db0dca7c69ce3e2a7f2bfc5999cf6b817bb313)
+  Thanks [@stefanprobst](https://github.com/stefanprobst)! - add entrypoint for runtime env vars
+
 ## 0.1.1
 
 ### Patch Changes
