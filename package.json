@@ -23,11 +23,11 @@
 	"devEngines": {
 		"runtime": {
 			"name": "node",
-			"version": "^22",
+			"version": "^24",
 			"onFail": "download"
 		}
 	},
-	"packageManager": "pnpm@10.14.0",
+	"packageManager": "pnpm@10.28.2",
 	"scripts": {
 		"build": "tsdown",
 		"changeset:add": "changeset add",
