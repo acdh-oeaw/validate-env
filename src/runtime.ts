@@ -9,7 +9,7 @@ type Input = Record<string, unknown>;
 interface CreateEnvParams<TPrivate extends Input> {
 	schema: (environment: Input) => Result<TPrivate, ValidationError>;
 	environment: Record<keyof NoInfer<TPrivate>, unknown>;
-	validation?: "disabled" | "enabled";
+	validation?: "disabled" | "enabled" | "public";
 }
 
 export function createEnv<TPrivate extends Input>({
@@ -23,7 +23,7 @@ export function createEnv<TPrivate extends Input>({
 		}
 	}
 
-	if (validation === "disabled") {
+	if (validation === "disabled" || validation === "public") {
 		return ok(Object.freeze(environment as any));
 	}
 
