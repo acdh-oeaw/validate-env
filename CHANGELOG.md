@@ -1,5 +1,14 @@
 # @acdh-oeaw/validate-env
 
+## 0.3.0
+
+### Minor Changes
+
+- [#21](https://github.com/acdh-oeaw/validate-env/pull/21)
+  [`9caaeb4`](https://github.com/acdh-oeaw/validate-env/commit/9caaeb499b244f2f143b0331a9bd70ea0be205a5)
+  Thanks [@stefanprobst](https://github.com/stefanprobst)! - accept public option in runtime
+  validation
+
 ## 0.2.1
 
 ### Patch Changes
