@@ -1,22 +1,27 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-import { err, ok, type Result } from "@acdh-oeaw/lib";
-
 import { ValidationError } from "./index.js";
 
 type Input = Record<string, unknown>;
 
 interface CreateEnvParams<TPrivate extends Input> {
-	schema: (environment: Input) => Result<TPrivate, ValidationError>;
+	/**
+	 * Receives the raw environment and returns the validated variables.
+	 * Should throw a `ValidationError` when validation fails.
+	 */
+	schema: (environment: Input) => TPrivate;
 	environment: Record<keyof NoInfer<TPrivate>, unknown>;
 	validation?: "disabled" | "enabled" | "public";
 }
 
+/**
+ * Validates runtime environment variables.
+ *
+ * @throws {ValidationError} when the provided schema fails validation.
+ */
 export function createEnv<TPrivate extends Input>({
 	schema,
 	environment,
 	validation,
-}: CreateEnvParams<TPrivate>): Result<Readonly<TPrivate>, ValidationError> {
+}: CreateEnvParams<TPrivate>): Readonly<TPrivate> {
 	for (const [key, value] of Object.entries(environment)) {
 		if (value === "") {
 			environment[key as keyof typeof environment] = undefined;
@@ -24,16 +29,10 @@ export function createEnv<TPrivate extends Input>({
 	}
 
 	if (validation === "disabled" || validation === "public") {
-		return ok(Object.freeze(environment as any));
+		return Object.freeze(environment) as Readonly<TPrivate>;
 	}
 
-	const runtime = schema(environment);
-
-	if (ValidationError.is(runtime.error)) {
-		return err(runtime.error);
-	}
-
-	return ok(Object.freeze(runtime.value as any));
+	return Object.freeze(schema(environment));
 }
 
 export { ValidationError };

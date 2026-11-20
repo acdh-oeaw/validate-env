@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-import { err, ok, type Result } from "@acdh-oeaw/lib";
-
 export class ValidationError extends Error {
 	private static readonly type = "ValidationError";
 
@@ -13,8 +9,8 @@ export class ValidationError extends Error {
 		return error instanceof Error && error.name === ValidationError.type;
 	}
 
-	constructor(message?: string) {
-		super(message);
+	constructor(message?: string, options?: ErrorOptions) {
+		super(message, options);
 
 		this.name = ValidationError.type;
 	}
@@ -31,8 +27,8 @@ export class InvalidPropertyAccessError extends Error {
 		return error instanceof Error && error.name === InvalidPropertyAccessError.type;
 	}
 
-	constructor(message?: string) {
-		super(message);
+	constructor(message?: string, options?: ErrorOptions) {
+		super(message, options);
 
 		this.name = InvalidPropertyAccessError.type;
 	}
@@ -63,10 +59,14 @@ export interface CreateEnvParams<
 	TSystem extends Unprefixed<TPrefix, TSystem>,
 > {
 	prefix: TPrefix;
+	/**
+	 * Schema functions receive the raw environment and return the validated variables.
+	 * They should throw a `ValidationError` when validation fails.
+	 */
 	schemas: {
-		private?: (environment: Input) => Result<TPrivate, ValidationError>;
-		public?: (environment: Input) => Result<TPublic, ValidationError>;
-		system?: (environment: Input) => Result<TSystem, ValidationError>;
+		private?: (environment: Input) => TPrivate;
+		public?: (environment: Input) => TPublic;
+		system?: (environment: Input) => TSystem;
 	};
 	environment: Record<
 		keyof NoInfer<TPrivate> | keyof NoInfer<TPublic> | keyof NoInfer<TSystem>,
@@ -76,6 +76,11 @@ export interface CreateEnvParams<
 	isClient?: boolean;
 }
 
+/**
+ * Validates environment variables.
+ *
+ * @throws {ValidationError} when any of the provided schemas fails validation.
+ */
 export function createEnv<
 	TPrefix extends string,
 	TPrivate extends Unprefixed<TPrefix, TPrivate>,
@@ -86,10 +91,9 @@ export function createEnv<
 	environment,
 	validation = "enabled",
 	isClient = typeof document !== "undefined",
-}: CreateEnvParams<TPrefix, TPrivate, TPublic, TSystem>): Result<
-	Readonly<TPrivate & TPublic & TSystem>,
-	ValidationError
-> {
+}: CreateEnvParams<TPrefix, TPrivate, TPublic, TSystem>): Readonly<TPrivate & TPublic & TSystem> {
+	type Env = Readonly<TPrivate & TPublic & TSystem>;
+
 	for (const [key, value] of Object.entries(environment)) {
 		if (value === "") {
 			environment[key as keyof typeof environment] = undefined;
@@ -97,45 +101,29 @@ export function createEnv<
 	}
 
 	if (validation === "disabled") {
-		return ok(Object.freeze(environment as any));
+		return Object.freeze(environment) as Env;
 	}
 
 	const shared = schemas.system?.(environment);
-
-	if (ValidationError.is(shared?.error)) {
-		return err(shared.error);
-	}
-
 	const build = schemas.public?.(environment);
 
-	if (ValidationError.is(build?.error)) {
-		return err(build.error);
-	}
-
 	if (isClient) {
-		return ok(
-			new Proxy(Object.freeze({ ...build?.value, ...shared?.value }), {
-				get(target, prop) {
-					if (prop in target) {
-						// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-						return Reflect.get(target, prop);
-					}
+		return new Proxy(Object.freeze({ ...build, ...shared }), {
+			get(target, prop) {
+				if (prop in target) {
+					return Reflect.get(target, prop) as unknown;
+				}
 
-					throw new InvalidPropertyAccessError(`Invalid property access: ${String(prop)}.`);
-				},
-			}) as any,
-		);
+				throw new InvalidPropertyAccessError(`Invalid property access: ${String(prop)}.`);
+			},
+		}) as Env;
 	}
 
 	if (validation === "public") {
-		return ok(Object.freeze({ ...environment, ...build?.value, ...shared?.value } as any));
+		return Object.freeze({ ...environment, ...build, ...shared }) as Env;
 	}
 
 	const runtime = schemas.private?.(environment);
 
-	if (ValidationError.is(runtime?.error)) {
-		return err(runtime.error);
-	}
-
-	return ok(Object.freeze({ ...runtime?.value, ...build?.value, ...shared?.value } as any));
+	return Object.freeze({ ...runtime, ...build, ...shared }) as Env;
 }
