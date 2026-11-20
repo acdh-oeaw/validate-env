@@ -4,6 +4,7 @@ export default defineConfig({
 	clean: true,
 	dts: true,
 	entry: ["./src/index.ts", "./src/astro.ts", "./src/next.ts", "./src/runtime.ts"],
+	fixedExtension: false,
 	format: ["esm"],
 	minify: false,
 	sourcemap: true,

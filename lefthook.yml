@@ -1,0 +1,19 @@
+commit-msg:
+  jobs:
+    - name: commitlint
+      run: pnpm exec commitlint --edit {1}
+
+pre-commit:
+  jobs:
+    - name: lint
+      glob: "*.ts"
+      run: pnpm exec oxlint --type-aware --fix {staged_files}
+      stage_fixed: true
+    - name: format
+      run: pnpm exec oxfmt --no-error-on-unmatched-pattern {staged_files}
+      stage_fixed: true
+
+pre-push:
+  jobs:
+    - name: validate
+      run: pnpm run validate

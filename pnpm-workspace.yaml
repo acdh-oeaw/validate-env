@@ -1,4 +1,6 @@
-onlyBuiltDependencies:
-  - esbuild
-  - simple-git-hooks
-  - unrs-resolver
+allowBuilds:
+  esbuild: true
+  lefthook: true
+engineStrict: true
+shellEmulator: true
+strictDepBuilds: true
