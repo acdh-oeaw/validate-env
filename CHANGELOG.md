@@ -1,5 +1,22 @@
 # @acdh-oeaw/validate-env
 
+## 0.4.0
+
+### Minor Changes
+
+- [#25](https://github.com/acdh-oeaw/validate-env/pull/25)
+  [`eb1ee07`](https://github.com/acdh-oeaw/validate-env/commit/eb1ee07136f96361b7f30db17e2c877fb34440f9)
+  Thanks [@stefanprobst](https://github.com/stefanprobst)! - **breaking:** `createEnv` no longer
+  uses `Result` types. schema functions now return the validated values directly and should throw a
+  `ValidationError` on failure; `createEnv` returns the validated environment and throws when
+  validation fails. the `@acdh-oeaw/lib` dependency has been removed.
+
+### Patch Changes
+
+- [#25](https://github.com/acdh-oeaw/validate-env/pull/25)
+  [`eb1ee07`](https://github.com/acdh-oeaw/validate-env/commit/eb1ee07136f96361b7f30db17e2c877fb34440f9)
+  Thanks [@stefanprobst](https://github.com/stefanprobst)! - add support for node.js 26.
+
 ## 0.3.0
 
 ### Minor Changes
