@@ -1,6 +1,6 @@
 allowBuilds:
   esbuild: true
-  simple-git-hooks: true
+  lefthook: true
 engineStrict: true
 shellEmulator: true
 strictDepBuilds: true

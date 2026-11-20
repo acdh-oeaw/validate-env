@@ -38,9 +38,7 @@
 		"format:fix": "oxfmt",
 		"lint:check": "oxlint --type-aware",
 		"lint:fix": "pnpm run lint:check --fix",
-		"prepare": "run-s setup",
 		"prepublishOnly": "run-s validate build",
-		"setup": "is-ci || simple-git-hooks",
 		"test": "uvu -r tsm",
 		"types:check": "tsc --noEmit",
 		"validate": "run-p format:check lint:check types:check test"
@@ -53,14 +51,12 @@
 		"@acdh-oeaw/tsconfig-lib": "^1.3.0",
 		"@changesets/changelog-github": "^1.0.1",
 		"@changesets/cli": "^3.0.3",
-		"@commitlint/cli": "^21.2.4",
-		"is-ci": "^4.1.0",
-		"lint-staged": "^17.6.1",
+		"@commitlint/cli": "^20.5.3",
+		"lefthook": "^2.2.2",
 		"npm-run-all2": "^9.0.4",
 		"oxfmt": "^0.79.0",
 		"oxlint": "^1.94.0",
 		"oxlint-tsgolint": "^7.0.2007",
-		"simple-git-hooks": "^2.14.0",
 		"tsdown": "^0.23.7",
 		"tsm": "^2.3.0",
 		"typescript": "^7.0.2",
@@ -69,17 +65,5 @@
 	},
 	"commitlint": {
 		"extends": "@acdh-oeaw/commitlint-config"
-	},
-	"lint-staged": {
-		"*.ts": [
-			"oxlint --type-aware --fix",
-			"oxfmt --no-error-on-unmatched-pattern"
-		],
-		"!(*.ts)": "oxfmt --no-error-on-unmatched-pattern"
-	},
-	"simple-git-hooks": {
-		"commit-msg": "pnpm exec commitlint --edit",
-		"pre-commit": "pnpm exec lint-staged",
-		"pre-push": "pnpm run validate"
 	}
 }
